@@ -1,0 +1,830 @@
+﻿
+@{
+    ViewData["Title"] = "Sürücü Adayı Girişi";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var roles = WebApp.Controllers.HomeController.Roles;
+}
+
+@model dynamic
+
+@{
+    var _driverInformation = Model.DriverInformation as Entities.Concrete.DriverInformation;
+    var _sp_getPayments = Model.Sp_GetPayments as List<Entities.Dtos.sp_GetPayment>;
+    var _sp_getSequentialPaymentsYSH = Model.Sp_GetSequentialPaymentsYSH as List<Entities.Dtos.sp_GetSequentialPayment>;
+    var _sp_getSequentialPaymentsDSHFirst = Model.Sp_GetSequentialPaymentsDSHFirst as List<Entities.Dtos.sp_GetSequentialPayment>;
+    var _sp_getPaymentsPlus = Model.Sp_GetPaymentsPlus as List<Entities.Dtos.sp_GetPayment>;
+    var _sp_GetSequentialPaymentsDSHPlus = Model.Sp_GetSequentialPaymentsDSHPlus as List<Entities.Dtos.sp_GetSequentialPayment>;
+    var _sp_GetSequentialPaymentsPrivateLesson = Model.Sp_GetSequentialPaymentsPrivateLesson as List<Entities.Dtos.sp_GetSequentialPayment>;
+}
+
+<div class="card card-custom card-sticky" id="kt_page_sticky_card">
+    <div class="card-header">
+        <div class="card-title">
+            <h3 class="card-label">
+                @ViewData["Title"] <i class="mr-2"></i>
+                <small class="">@ViewData["Title"] Ekleme - Düzenleme - Silme</small>
+            </h3>
+        </div>
+        <div class="card-toolbar">
+            <a href="/Driver/Index" class="btn btn-light font-weight-bolder mr-2">
+                <i class="ki ki-long-arrow-back icon-sm"></i>
+                Geri
+            </a>
+
+            @if (_driverInformation != null && _driverInformation.Id > 0)
+            {
+
+                <a href="javascript:;" class="btn btn-light-warning font-weight-bolder mr-2" onclick="js_getAllCollectionDetailsByDriverInformationId(@_driverInformation.Id)">
+                    <i class="ki ki-bold-sort icon-sm"></i>
+                    Tahsilat Listesi
+                </a>
+
+
+                @if (User.Identity.Name == "admin" || (roles.Where(x => x.FormName == "Driver" && x.Print).Any()))
+                {
+                    <div class="dropdown dropdown-inline">
+                        <a class="btn btn-secondary font-weight-bold dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                            <span class="svg-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24px" height="24px" viewBox="0 0 24 24" version="1.1">
+                                    <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                                        <rect x="0" y="0" width="24" height="24" />
+                                        <path d="M16,17 L16,21 C16,21.5522847 15.5522847,22 15,22 L9,22 C8.44771525,22 8,21.5522847 8,21 L8,17 L5,17 C3.8954305,17 3,16.1045695 3,15 L3,8 C3,6.8954305 3.8954305,6 5,6 L19,6 C20.1045695,6 21,6.8954305 21,8 L21,15 C21,16.1045695 20.1045695,17 19,17 L16,17 Z M17.5,11 C18.3284271,11 19,10.3284271 19,9.5 C19,8.67157288 18.3284271,8 17.5,8 C16.6715729,8 16,8.67157288 16,9.5 C16,10.3284271 16.6715729,11 17.5,11 Z M10,14 L10,20 L14,20 L14,14 L10,14 Z" fill="#000000" />
+                                        <rect fill="#000000" opacity="0.3" x="8" y="2" width="8" height="2" rx="1" />
+                                    </g>
+                                </svg>
+                            </span>Yazdır
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-sm dropdown-menu-right">
+                            <ul class="nav nav-hover flex-column">
+                                <li class="nav-item">
+                                    <a href="javascript:;" class="nav-link" onclick="js_printApplicationForm()">
+                                        <!--Öncesinde Kaydetme İşlemi Yapılacak-->
+                                        <i class="nav-icon flaticon2-print"></i>
+                                        <span class="nav-text">Müracaat Formu</span>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="javascript:;" class="nav-link" onclick="js_printAddressForm()">
+                                        <!--Öncesinde Kaydetme İşlemi Yapılacak-->
+                                        <i class="nav-icon flaticon2-print"></i>
+                                        <span class="nav-text">Adres Beyan Formu</span>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="\Report\KFileReport?driverInformationId=@_driverInformation.Id" class="nav-link" target="_blank">
+                                        <!--Öncesinde Kaydetme İşlemi Yapılacak-->
+                                        <i class="nav-icon flaticon2-print"></i>
+                                        <span class="nav-text">"K" Sınıfı Sürücü Aday Belgesi</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                }
+
+            }
+            &nbsp;
+            <div class="dropdown dropdown-inline">
+                <a class="btn btn-success font-weight-bold dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                    <span class="svg-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24px" height="24px" viewBox="0 0 24 24" version="1.1">
+                            <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                                <polygon points="0 0 24 0 24 24 0 24" />
+                                <path d="M17,4 L6,4 C4.79111111,4 4,4.7 4,6 L4,18 C4,19.3 4.79111111,20 6,20 L18,20 C19.2,20 20,19.3 20,18 L20,7.20710678 C20,7.07449854 19.9473216,6.94732158 19.8535534,6.85355339 L17,4 Z M17,11 L7,11 L7,4 L17,4 L17,11 Z" fill="#000000" fill-rule="nonzero" />
+                                <rect fill="#000000" opacity="0.3" x="12" y="4" width="3" height="5" rx="0.5" />
+                            </g>
+                        </svg>
+                    </span>Kaydet
+                </a>
+                <div class="dropdown-menu dropdown-menu-sm dropdown-menu-right">
+                    <ul class="nav nav-hover flex-column">
+                        <li class="nav-item">
+                            <a href="javascript:;" class="nav-link" onclick="js_checkDriverForAdd(0)">
+                                <!--Öncesinde Kaydetme İşlemi Yapılacak-->
+                                <i class="nav-icon flaticon2-reload"></i>
+                                <span class="nav-text">Kaydet & Devam Et</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="javascript:;" class="nav-link" onclick="js_checkDriverForAdd(1)">
+                                <!--Öncesinde Kaydetme İşlemi Yapılacak-->
+                                <i class="nav-icon flaticon2-add-1"></i>
+                                <span class="nav-text">Kaydet & Yeni Kayıt</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="javascript:;" class="nav-link" onclick="js_deleteDriverByIdQ(@if (_driverInformation != null) @_driverInformation.Id)">
+                                <i class="nav-icon flaticon2-delete"></i>
+                                <span class="nav-text">Sil</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        <!--begin::Form-->
+        <form class="form" id="kt_form">
+            <div class="row">
+
+                <div class="col-lg-6">
+                    <form class="form">
+                        <div class="card-body">
+                            <div class="my-5">
+                                <h3 class=" text-dark font-weight-bold mb-10">Sürücü Adayı Genel Bilgiler:</h3>
+
+                                <!--begin::Group-->
+                                <div class="form-group row">
+                                    <label class="col-xl-3 col-lg-3 col-form-label text-left">Sürücü Adayı Resmi</label>
+                                    <div class="col-lg-9 col-xl-9">
+                                        <div class="image-input image-input-outline" id="kt_image_1">
+                                            <div class="image-input-wrapper" id="imgDriver" style="background-image: url(@_driverInformation.Image);"></div> <!--style="background-image: url(assets/media/users/100_6.jpg); background-size: 100% 100%;"-->
+                                            <label class="btn btn-xs btn-icon btn-circle btn-white btn-hover-text-primary btn-shadow" data-action="change" data-toggle="tooltip" title="" data-original-title="Resim Düzenle">
+                                                <i class="fa fa-pen icon-sm text-muted"></i>
+                                                <input type="file" name="profile_avatar" accept=".png, .jpg, .jpeg" />
+                                                <input type="hidden" name="profile_avatar_remove" />
+                                            </label>
+                                            <span class="btn btn-xs btn-icon btn-circle btn-white btn-hover-text-primary btn-shadow" data-action="cancel" data-toggle="tooltip" title="İptal">
+                                                <i class="ki ki-bold-close icon-xs text-muted"></i>
+                                            </span>
+                                            <span class="btn btn-xs btn-icon btn-circle btn-white btn-hover-text-primary btn-shadow" data-action="remove" data-toggle="tooltip" title="Sil">
+                                                <i class="ki ki-bold-close icon-xs text-muted"></i>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!--end::Group-->
+                                <!--begin::Group-->
+                                <div class="form-group row">
+                                    <label class="col-xl-3 col-lg-3 col-form-label">Adı</label>
+                                    <div class="col-lg-9 col-xl-9">
+                                        <input class="form-control form-control-solid form-control-lg" name="txtName" id="txtName" type="text" value="@if (_driverInformation != null) @_driverInformation.Name" />
+                                    </div>
+                                </div>
+                                <!--end::Group-->
+                                <!--begin::Group-->
+                                <div class="form-group row">
+                                    <label class="col-xl-3 col-lg-3 col-form-label">Soyadı</label>
+                                    <div class="col-lg-9 col-xl-9">
+                                        <input class="form-control form-control-solid form-control-lg" name="txtSurname" id="txtSurname" type="text" value="@if (_driverInformation != null) @_driverInformation.Surname" />
+                                    </div>
+                                </div>
+                                <!--end::Group-->
+                                <!--begin::Group-->
+                                <div class="form-group row">
+                                    <label class="col-xl-3 col-lg-3 col-form-label">Tc Kimlik No</label>
+                                    <div class="col-lg-9 col-xl-9">
+                                        <input class="form-control form-control-solid form-control-lg justNumber" name="txtIdentityNo" id="txtIdentityNo" type="tel" maxlength="11" value="@if (_driverInformation != null) @_driverInformation.IdentityNo" />
+                                    </div>
+                                </div>
+                                <!--end::Group-->
+                                <!--begin::Group-->
+                                <div class="form-group row">
+                                    <label class="col-xl-3 col-lg-3 col-form-label">Baba Adı</label>
+                                    <div class="col-lg-9 col-xl-9">
+                                        <input class="form-control form-control-solid form-control-lg" name="txtFatherName" id="txtFatherName" type="text" value="@if (_driverInformation != null) @_driverInformation.FatherName" />
+                                    </div>
+                                </div>
+                                <!--end::Group-->
+                                <!--begin::Group-->
+                                <div class="form-group row">
+                                    <label class="col-xl-3 col-lg-3 col-form-label">Doğum Yeri</label>
+                                    <div class="col-lg-9 col-xl-9">
+                                        <input class="form-control form-control-solid form-control-lg" name="txtBirthPlace" id="txtBirthPlace" type="text" value="@if (_driverInformation != null) @_driverInformation.BirthPlace" />
+                                    </div>
+                                </div>
+                                <!--end::Group-->
+                                <!--begin::Group-->
+                                <div class="form-group row">
+                                    <label class="col-xl-3 col-lg-3 col-form-label">Doğum Tarihi</label>
+                                    <div class="col-lg-9 col-xl-9 date">
+                                        <input type="text" class="form-control form-control-solid form-control-lg" value="@if (_driverInformation == null || _driverInformation.Id == 0 || _driverInformation.BirthDate == null) @string.Format("") else @(((DateTime)_driverInformation.BirthDate).Date.ToShortDateString())" id="kt_datepicker_3_2" name="txtBirthDate" />
+                                    </div>
+                                </div>
+                                <!--end::Group-->
+                                <!--begin::Group-->
+                                <div class="form-group row">
+                                    <label class="col-xl-3 col-lg-3 col-form-label">Telefon 1</label>
+                                    <div class="col-lg-9 col-xl-9">
+                                        <div class="input-group input-group-solid input-group-lg">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text">
+                                                    <i class="la la-phone"></i>
+                                                </span>
+                                            </div>
+                                            <input type="text" class="form-control form-control-solid form-control-lg phone" name="txtPhone1" id="txtPhone1" value="@if (_driverInformation != null) @_driverInformation.Phone1" placeholder="Telefon 1" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <!--end::Group-->
+                                <!--begin::Group-->
+                                <div class="form-group row">
+                                    <label class="col-xl-3 col-lg-3 col-form-label">Telefon 2</label>
+                                    <div class="col-lg-9 col-xl-9">
+                                        <div class="input-group input-group-solid input-group-lg">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text">
+                                                    <i class="la la-phone"></i>
+                                                </span>
+                                            </div>
+                                            <input type="text" class="form-control form-control-solid form-control-lg phone" name="txtPhone2" id="txtPhone2" value="@if (_driverInformation != null) @_driverInformation.Phone2" placeholder="Telefon 2" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <!--end::Group-->
+                                <!--begin::Group-->
+                                <div class="form-group row">
+                                    <label class="col-xl-3 col-lg-3 col-form-label">Email Adresi</label>
+                                    <div class="col-lg-9 col-xl-9">
+                                        <div class="input-group input-group-solid input-group-lg">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text">
+                                                    <i class="la la-at"></i>
+                                                </span>
+                                            </div>
+                                            <input type="text" class="form-control form-control-solid form-control-lg" name="txtEmail" id="txtEmail" value="@if (_driverInformation != null) @_driverInformation.Email" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <!--end::Group-->
+                                <!--begin::Group-->
+                                <div class="form-group">
+                                    <label>Not</label>
+                                    <input type="text" class="form-control form-control-solid form-control-lg" name="txtNote" id="txtNote" placeholder="Not" value="@if(_driverInformation != null) @_driverInformation.Note" />
+                                </div>
+                                <!--end::Group-->
+                                <!--Adres Bilgisi-->
+                                <!--begin::Row-->
+                                <div class="row">
+                                    <div class="col-xl-6">
+                                        <!--begin::Group-->
+                                        <div class="form-group">
+                                            <label>İl</label>
+                                            <input type="text" class="form-control form-control-solid form-control-lg" name="txtCity" id="txtCity" placeholder="İl Adı" value="@if(_driverInformation != null) @_driverInformation.City" />
+                                        </div>
+                                    </div>
+                                    <!--end::Group-->
+                                    <!--begin::Group-->
+                                    <div class="col-xl-6">
+                                        <div class="form-group">
+                                            <label>İlçe</label>
+                                            <input type="text" class="form-control form-control-solid form-control-lg" name="txtCounty" id="txtCounty" placeholder="İlçe Adı" value="@if(_driverInformation != null) @_driverInformation.County" />
+                                        </div>
+                                    </div>
+                                    <!--end::Group-->
+                                </div>
+                                <!--end::Row-->
+                                <!--begin::Group-->
+                                <div class="form-group">
+                                    <label>Address Satırı 1</label>
+                                    <input type="text" class="form-control form-control-solid form-control-lg" name="txtAddress1" id="txtAddress1" placeholder="Address Satırı 1" value="@if(_driverInformation != null) @_driverInformation.Address1" />
+                                </div>
+                                <!--end::Group-->
+                                <!--begin::Group-->
+                                <div class="form-group">
+                                    <label>Address Satırı 2</label>
+                                    <input type="text" class="form-control form-control-solid form-control-lg" name="txtAddress2" id="txtAddress2" placeholder="Address Satırı 2" value="@if(_driverInformation != null) @_driverInformation.Address2" />
+                                </div>
+                                <!--end::Group-->
+
+                            </div>
+
+                        </div>
+                    </form>
+                </div>
+
+                <div class="col-lg-6">
+                    <form class="form">
+                        <div class="card-body">
+
+                            <div class="my-5">
+
+                                <h3 class=" text-dark font-weight-bold mb-10">Sürücü Kurs Bilgileri:</h3>
+
+                                <!--begin::Group-->
+                                <div class="form-group row">
+                                    <label class="col-xl-3 col-lg-3 col-form-label">Sürücü Adayı Id</label>
+                                    <div class="col-lg-9 col-xl-9">
+                                        <input class="form-control form-control-solid form-control-lg" disabled="disabled" name="txtId" id="txtId" type="text" value="@if (_driverInformation != null) @_driverInformation.Id" />
+                                    </div>
+                                </div>
+                                <!--end::Group-->
+
+                                @await Component.InvokeAsync("SessionList", new { sessionId = ((_driverInformation == null || _driverInformation.Session == null) ? (int)0 : (int)_driverInformation.Session.Id) })
+
+                                @await Component.InvokeAsync("BranchList", new { branchId = ((_driverInformation == null || _driverInformation.Branch == null) ? (int)0 : (int)_driverInformation.Branch.Id) })
+
+                                <!--begin::Group-->
+                                <div class="form-group row">
+                                    <label class="col-xl-3 col-lg-3 col-form-label">Kurs Ücreti</label>
+                                    <div class="col-lg-9 col-xl-9">
+                                        <input class="form-control form-control-solid form-control-lg numeric2" name="txtCourseFee" id="txtCourseFee" type="text" value="@if (_driverInformation != null) @_driverInformation.CourseFee" />
+                                    </div>
+                                </div>
+                                <!--end::Group-->
+                                <!--begin::Group-->
+                                <div class="form-group row">
+                                    <label class="col-xl-3 col-lg-3 col-form-label">İlave 4 Hak Ücreti</label>
+                                    <div class="col-lg-9 col-xl-9">
+                                        <input class="form-control form-control-solid form-control-lg numeric2" name="txtCourseFeePlus" id="txtCourseFeePlus" type="text" value="@if (_driverInformation != null) @_driverInformation.CourseFeePlus" />
+                                    </div>
+                                </div>
+                                <!--end::Group-->
+                                <!--begin::Group-->
+                                <div class="form-group row">
+                                    <label class="col-xl-3 col-lg-3 col-form-label">Kayıt Tarihi</label>
+                                    <div class="col-lg-9 col-xl-9 date">
+                                        <input type="text" class="form-control" value="@if (_driverInformation == null || _driverInformation.Id == 0) @DateTime.Now.Date.ToShortDateString() else @_driverInformation.RecordDate.Date.ToShortDateString()" id="kt_datepicker_3" name="txtRecordDate" />
+                                    </div>
+                                </div>
+                                <!--end::Group-->
+                                <!--begin::Group-->
+                                <div class="form-group row">
+                                    <label class="col-3 col-form-label">Sertifika Durumu</label>
+                                    <div class="col-3">
+                                        <span class="switch switch-outline switch-icon switch-success">
+                                            <label>
+                                                <input type="checkbox" @Html.Raw((_driverInformation != null) ? (((_driverInformation.IsCertificateDelivered) ? "checked" : "")) : "checked") name="select" id="chkIsCertificateDelivered" />
+                                                <span></span>
+                                            </label>
+                                        </span>
+                                    </div>
+                                </div>
+                                <!--end::Group-->
+                                <!--begin::Group-->
+                                <div class="form-group row">
+                                    <label class="col-xl-3 col-lg-3 col-form-label">Sertifika Tarihi</label>
+                                    <div class="col-lg-9 col-xl-9 date">
+                                        <input type="text" class="form-control" value="@if (_driverInformation == null || _driverInformation.Id == 0 || _driverInformation.CertificateDeliveredDate == null) @string.Format("") else @(((DateTime)_driverInformation.CertificateDeliveredDate).Date.ToShortDateString())" id="kt_datepicker_3_1" name="txtCertificateDeliveredDate" />
+                                    </div>
+                                </div>
+                                <!--end::Group-->
+
+                            </div>
+                        </div>
+
+                        <div class="card-body">
+
+                            <div class="my-5">
+
+                                <h3 class=" text-dark font-weight-bold mb-10">Diğer Bilgiler:</h3>
+
+                                <!--begin::Group-->
+                                <div class="form-group row">
+                                    <label class="col-xl-3 col-lg-3 col-form-label">Kayıt Numarası</label>
+                                    <div class="col-lg-9 col-xl-9">
+                                        <input type="text" class="form-control" name="txtRecordNumber" id="txtRecordNumber" placeholder="Kayıt Numarası" value="@if(_driverInformation != null) @_driverInformation.RecordNumber" />
+                                    </div>
+
+                                </div>
+                                <!--end::Group-->
+                                <!--begin::Group-->
+                                <div class="form-group row">
+                                    <label class="col-xl-3 col-lg-3 col-form-label">Dönem Tarihi</label>
+                                    <div class="col-lg-9 col-xl-9 date">
+                                        <input type="text" class="form-control" value="@if (_driverInformation == null || _driverInformation.Id == 0 || _driverInformation.SessionDate == null) @string.Format("") else @(((DateTime)_driverInformation.SessionDate).Date.ToShortDateString())" id="kt_datepicker_3_3" name="txtSessionDate" />
+                                    </div>
+                                </div>
+                                <!--end::Group-->
+                                <!--begin::Group-->
+                                <div class="form-group row">
+                                    <label class="col-xl-3 col-lg-3 col-form-label">Ders Giriş Tarihi</label>
+                                    <div class="col-lg-9 col-xl-9 date">
+                                        <input type="text" class="form-control" value="@if (_driverInformation == null || _driverInformation.Id == 0 || _driverInformation.CourseStartDate == null) @string.Format("") else @(((DateTime)_driverInformation.CourseStartDate).Date.ToShortDateString())" id="kt_datepicker_3_4" name="txtCourseStartDate" />
+                                    </div>
+                                </div>
+                                <!--end::Group-->
+                                <!--begin::Group-->
+                                <div class="form-group row">
+                                    <label class="col-xl-3 col-lg-3 col-form-label">Ders Bitiş Tarihi</label>
+                                    <div class="col-lg-9 col-xl-9 date">
+                                        <input type="text" class="form-control" value="@if (_driverInformation == null || _driverInformation.Id == 0 || _driverInformation.CourseEndDate == null) @string.Format("") else @(((DateTime)_driverInformation.CourseEndDate).Date.ToShortDateString())" id="kt_datepicker_3_5" name="txtCourseEndDate" />
+                                    </div>
+                                </div>
+                                <!--end::Group-->
+
+                                @await Component.InvokeAsync("PersonnelDefinitionMasterTrainerList", new { personnelDefinitionId = ((_driverInformation == null || _driverInformation.PersonnelDefinitionId == null) ? (int)0 : (int)_driverInformation.PersonnelDefinitionId), officeId = (int)ViewData["OfficeId"] })
+
+                            </div>
+
+                        </div>
+
+                    </form>
+                </div>
+
+                <div class="col-xl-2"></div>
+
+                @if (_driverInformation != null && _driverInformation.Id > 0)
+                {
+                    <div class="col-lg-12">
+                        <div class="separator separator-dashed my-10"></div>
+                        <div class="my-5">
+                            <h3 class=" text-dark font-weight-bold mb-10">Kurs Ücreti Ödeme Planı:</h3>
+
+                            <!--begin::Group-->
+                            <div class="form-group row">
+                                <!--begin::Button-->
+                                <a href="javascript:;" class="btn btn-secondary font-weight-bolder" data-toggle="modal" data-target="#NewHirePurchase" onclick="js_newHirePurchase(10)">
+                                    <!--data-toggle="modal" data-target="#NewCollection" onclick="js_getCollectionByIdWithDetails(0)"-->
+                                    <span class="svg-icon svg-icon-md">
+                                        <!--begin::Svg Icon | path:assets/media/svg/icons/Design/Flatten.svg-->
+                                        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24px" height="24px" viewBox="0 0 24 24" version="1.1">
+                                            <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                                                <rect x="0" y="0" width="24" height="24" />
+                                                <circle fill="#000000" cx="9" cy="15" r="6" />
+                                                <path d="M8.8012943,7.00241953 C9.83837775,5.20768121 11.7781543,4 14,4 C17.3137085,4 20,6.6862915 20,10 C20,12.2218457 18.7923188,14.1616223 16.9975805,15.1987057 C16.9991904,15.1326658 17,15.0664274 17,15 C17,10.581722 13.418278,7 9,7 C8.93357256,7 8.86733422,7.00080962 8.8012943,7.00241953 Z" fill="#000000" opacity="0.3" />
+                                            </g>
+                                        </svg>
+                                        <!--end::Svg Icon-->
+                                    </span>Taksitlendir
+                                </a>
+                                <!--end::Button-->
+                                <!--begin::Button-->
+                                <a href="javascript:;" class="btn btn-primary font-weight-bolder" data-toggle="modal" data-target="#NewDriverPaymentPlan" onclick="js_getDriverPaymentPlanById(0,10)">
+                                    <!--data-toggle="modal" data-target="#NewCollection" onclick="js_getCollectionByIdWithDetails(0)"-->
+                                    <span class="svg-icon svg-icon-md">
+                                        <!--begin::Svg Icon | path:assets/media/svg/icons/Design/Flatten.svg-->
+                                        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24px" height="24px" viewBox="0 0 24 24" version="1.1">
+                                            <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                                                <rect x="0" y="0" width="24" height="24" />
+                                                <circle fill="#000000" cx="9" cy="15" r="6" />
+                                                <path d="M8.8012943,7.00241953 C9.83837775,5.20768121 11.7781543,4 14,4 C17.3137085,4 20,6.6862915 20,10 C20,12.2218457 18.7923188,14.1616223 16.9975805,15.1987057 C16.9991904,15.1326658 17,15.0664274 17,15 C17,10.581722 13.418278,7 9,7 C8.93357256,7 8.86733422,7.00080962 8.8012943,7.00241953 Z" fill="#000000" opacity="0.3" />
+                                            </g>
+                                        </svg>
+                                        <!--end::Svg Icon-->
+                                    </span>İlave Taksit
+                                </a>
+                                <!--end::Button-->
+                            </div>
+                            <!--end::Group-->
+                            <!--begin::Group-->
+                            <div class="form-group row">
+                                <div class="table-responsive">
+                                    <table class="table">
+                                        <thead class="thead-dark">
+                                            <tr>
+                                                <th title="Islem" colspan="2">Taksit Islemi</th>
+
+                                                <th title="Taksit Ödeme Tarihi">Taksit Ödeme Tarihi</th>
+                                                <th title="Taksit Tutarı">Taksit Tutarı</th>
+                                                <th title="Ödeme Tarihi">Ödeme Tarihi</th>
+                                                <th title="Ödeme Türü">Ödeme Türü</th>
+                                                <th title="Kalan Borç">Kalan Borç</th>
+
+                                                <th title="Islem" colspan="2">Ödeme Islemi</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="dataListDriverPaymentPlan">
+                                            @await Html.PartialAsync("/Views/Driver/AddEditDriverCoursePayment.cshtml", _sp_getPayments)
+                                        </tbody>
+                                    </table>
+                                </div>                                
+                            </div>
+                            <!--end::Group-->
+
+
+                        </div>
+                    </div>
+
+                    <div class="col-xl-2"></div>
+
+                    <div class="col-lg-12">
+
+                        <div class="separator separator-dashed my-10"></div>
+
+                        <div class="my-5">
+                            <h3 class=" text-dark font-weight-bold mb-10">Yazılı Sınav Harcı Ödemeleri:</h3>
+
+                            <!--begin::Group-->
+                            <div class="form-group row">
+                                <div class="table-responsive">
+                                    <table class="table">
+                                        <thead class="thead-dark">
+                                            <tr>
+                                                <th title="Taksit Ödeme Tarihi">Ödeme Şekli</th>
+                                                <th title="Taksit Ödeme Tarihi">Ödeme Şekli Adı</th>
+                                                <th title="Taksit Ödeme Tarihi">Sıra</th>
+                                                <th title="Ödeme Tarihi">Ödeme Tarihi</th>
+                                                <th title="Taksit Tutarı">Tutar</th>
+
+                                                <th title="Islem" colspan="2">Islem</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="dataListDriverSequentialYSHPayment">
+                                            @await Html.PartialAsync("/Views/Driver/AddEditDriverSequentialPaymentYSH.cshtml", _sp_getSequentialPaymentsYSH)
+                                        </tbody>
+                                    </table>
+                                </div>                                
+                            </div>
+                            <!--end::Group-->
+
+                        </div>
+
+                    </div>
+
+                    <div class="col-xl-2"></div>
+
+                    <div class="col-lg-12">
+
+                        <div class="separator separator-dashed my-10"></div>
+
+                        <div class="my-5">
+                            <h3 class=" text-dark font-weight-bold mb-10">Direksiyon Sınav Harcı Ödemeleri:</h3>
+
+                            <!--begin::Group-->
+                            <div class="form-group row">
+                                <div class="table-responsive">
+                                    <table class="table">
+                                        <thead class="thead-dark">
+                                            <tr>
+                                                <th title="Taksit Ödeme Tarihi">Ödeme Şekli</th>
+                                                <th title="Taksit Ödeme Tarihi">Ödeme Şekli Adı</th>
+                                                <th title="Taksit Ödeme Tarihi">Sıra</th>
+                                                <th title="Ödeme Tarihi">Ödeme Tarihi</th>
+                                                <th title="Taksit Tutarı">Tutarı</th>
+
+                                                <th title="Islem" colspan="2">Islem</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="dataListDriverSequentialDSHFirstPayment">
+                                            @await Html.PartialAsync("/Views/Driver/AddEditDriverSequentialPaymentDSHFirst.cshtml", _sp_getSequentialPaymentsDSHFirst)
+                                        </tbody>
+                                    </table>
+                                </div>                                
+                            </div>
+                            <!--end::Group-->
+
+                        </div>
+
+                    </div>
+
+                    <div class="col-xl-2"></div>
+
+                    <div class="col-lg-12">
+                        <div class="separator separator-dashed my-10"></div>
+                        <div class="my-5">
+                            <h3 class=" text-dark font-weight-bold mb-10">İlave 4 Hak Ödeme Planı:</h3>
+
+                            <!--begin::Group-->
+                            <div class="form-group row">
+                                <!--begin::Button-->
+                                <a href="javascript:;" class="btn btn-secondary font-weight-bolder" data-toggle="modal" data-target="#NewHirePurchase" onclick="js_newHirePurchase(11)">
+                                    <!--data-toggle="modal" data-target="#NewCollection" onclick="js_getCollectionByIdWithDetails(0)"-->
+                                    <span class="svg-icon svg-icon-md">
+                                        <!--begin::Svg Icon | path:assets/media/svg/icons/Design/Flatten.svg-->
+                                        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24px" height="24px" viewBox="0 0 24 24" version="1.1">
+                                            <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                                                <rect x="0" y="0" width="24" height="24" />
+                                                <circle fill="#000000" cx="9" cy="15" r="6" />
+                                                <path d="M8.8012943,7.00241953 C9.83837775,5.20768121 11.7781543,4 14,4 C17.3137085,4 20,6.6862915 20,10 C20,12.2218457 18.7923188,14.1616223 16.9975805,15.1987057 C16.9991904,15.1326658 17,15.0664274 17,15 C17,10.581722 13.418278,7 9,7 C8.93357256,7 8.86733422,7.00080962 8.8012943,7.00241953 Z" fill="#000000" opacity="0.3" />
+                                            </g>
+                                        </svg>
+                                        <!--end::Svg Icon-->
+                                    </span>Taksitlendir
+                                </a>
+                                <!--end::Button-->
+                                <!--begin::Button-->
+                                <a href="javascript:;" class="btn btn-primary font-weight-bolder" data-toggle="modal" data-target="#NewDriverPaymentPlan" onclick="js_getDriverPaymentPlanById(0,11)">
+                                    <!--data-toggle="modal" data-target="#NewCollection" onclick="js_getCollectionByIdWithDetails(0)"-->
+                                    <span class="svg-icon svg-icon-md">
+                                        <!--begin::Svg Icon | path:assets/media/svg/icons/Design/Flatten.svg-->
+                                        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24px" height="24px" viewBox="0 0 24 24" version="1.1">
+                                            <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                                                <rect x="0" y="0" width="24" height="24" />
+                                                <circle fill="#000000" cx="9" cy="15" r="6" />
+                                                <path d="M8.8012943,7.00241953 C9.83837775,5.20768121 11.7781543,4 14,4 C17.3137085,4 20,6.6862915 20,10 C20,12.2218457 18.7923188,14.1616223 16.9975805,15.1987057 C16.9991904,15.1326658 17,15.0664274 17,15 C17,10.581722 13.418278,7 9,7 C8.93357256,7 8.86733422,7.00080962 8.8012943,7.00241953 Z" fill="#000000" opacity="0.3" />
+                                            </g>
+                                        </svg>
+                                        <!--end::Svg Icon-->
+                                    </span>İlave Taksit
+                                </a>
+                                <!--end::Button-->
+                            </div>
+                            <!--end::Group-->
+                            <!--begin::Group-->
+                            <div class="form-group row">
+                                <div class="table-responsive">
+                                    <table class="table">
+                                        <thead class="thead-dark">
+                                            <tr>
+                                                <th title="Islem" colspan="2">Taksit Islemi</th>
+
+                                                <th title="Taksit Ödeme Tarihi">Taksit Ödeme Tarihi</th>
+                                                <th title="Taksit Tutarı">Taksit Tutarı</th>
+                                                <th title="Ödeme Tarihi">Ödeme Tarihi</th>
+                                                <th title="Ödeme Türü">Ödeme Türü</th>
+                                                <th title="Kalan Borç">Kalan Borç</th>
+
+                                                <th title="Islem" colspan="2">Ödeme Islemi</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="dataListDriverPaymentPlusPlan">
+                                            @await Html.PartialAsync("/Views/Driver/AddEditDriverCoursePaymentPlus.cshtml", _sp_getPaymentsPlus)
+                                        </tbody>
+                                    </table>
+                                </div>                                
+                            </div>
+                            <!--end::Group-->
+
+
+                        </div>
+                    </div>
+
+                    <div class="col-xl-2"></div>
+
+                    <div class="col-lg-12">
+
+                        <div class="separator separator-dashed my-10"></div>
+
+                        <div class="my-5">
+                            <h3 class=" text-dark font-weight-bold mb-10">İlave Direksiyon Sınav Harcı Ödemeleri:</h3>
+
+                            <!--begin::Group-->
+                            <div class="form-group row">
+                                <div class="table-responsive">
+                                    <table class="table">
+                                        <thead class="thead-dark">
+                                            <tr>
+                                                <th title="Taksit Ödeme Tarihi">Ödeme Şekli</th>
+                                                <th title="Taksit Ödeme Tarihi">Ödeme Şekli Adı</th>
+                                                <th title="Taksit Ödeme Tarihi">Sıra</th>
+                                                <th title="Ödeme Tarihi">Ödeme Tarihi</th>
+                                                <th title="Taksit Tutarı">Tutarı</th>
+
+                                                <th title="Islem" colspan="2">Islem</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="dataListDriverSequentialDSHPlusPayment">
+                                            @await Html.PartialAsync("/Views/Driver/AddEditDriverSequentialPaymentDSHPlus.cshtml", _sp_GetSequentialPaymentsDSHPlus)
+                                        </tbody>
+                                    </table>
+                                </div>                                
+                            </div>
+                            <!--end::Group-->
+
+                        </div>
+
+                    </div>
+
+                    <div class="col-xl-2"></div>
+
+                    <div class="col-lg-12">
+
+                        <div class="separator separator-dashed my-10"></div>
+
+                        <div class="my-5">
+                            <h3 class=" text-dark font-weight-bold mb-10">Özel Ders Ödemeleri:</h3>
+                            <!--begin::Group-->
+                            <div class="form-group row">
+                                <!--begin::Button-->
+                                <a href="javascript:;" class="btn btn-primary font-weight-bolder" data-toggle="modal" data-target="#NewDriverCollectionDetail" onclick="js_getDriverCollectionDetailByIdWithDetails(0, '0',@_sp_GetSequentialPaymentsPrivateLesson.FirstOrDefault().CollectionDefinitionId, @_sp_GetSequentialPaymentsPrivateLesson.FirstOrDefault().CollectionDefinitionTypeId)">
+                                    <!--data-toggle="modal" data-target="#NewCollection" onclick="js_getCollectionByIdWithDetails(0)"-->
+                                    <span class="svg-icon svg-icon-md">
+                                        <!--begin::Svg Icon | path:assets/media/svg/icons/Design/Flatten.svg-->
+                                        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24px" height="24px" viewBox="0 0 24 24" version="1.1">
+                                            <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                                                <rect x="0" y="0" width="24" height="24" />
+                                                <circle fill="#000000" cx="9" cy="15" r="6" />
+                                                <path d="M8.8012943,7.00241953 C9.83837775,5.20768121 11.7781543,4 14,4 C17.3137085,4 20,6.6862915 20,10 C20,12.2218457 18.7923188,14.1616223 16.9975805,15.1987057 C16.9991904,15.1326658 17,15.0664274 17,15 C17,10.581722 13.418278,7 9,7 C8.93357256,7 8.86733422,7.00080962 8.8012943,7.00241953 Z" fill="#000000" opacity="0.3" />
+                                            </g>
+                                        </svg>
+                                        <!--end::Svg Icon-->
+                                    </span>Yeni Özel Ders Ödeme
+                                </a>
+                                <!--end::Button-->
+                            </div>
+                            <!--end::Group-->
+                            <!--begin::Group-->
+                            <div class="form-group row">
+                                <div class="table-responsive">
+                                    <table class="table">
+                                        <thead class="thead-dark">
+                                            <tr>
+                                                <th title="Taksit Ödeme Tarihi">Ödeme Şekli</th>
+                                                <th title="Taksit Ödeme Tarihi">Ödeme Şekli Adı</th>
+                                                <th title="Ödeme Tarihi">Ödeme Tarihi</th>
+                                                <th title="Taksit Tutarı">Tutarı</th>
+                                                <th title="Taksit Tutarı">Saat</th>
+
+                                                <th title="Islem" colspan="2">Islem</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="dataListDriverSequentialPrivateLesson">
+                                            @await Html.PartialAsync("/Views/Driver/AddEditDriverSequentialPaymentPrivateLesson.cshtml", _sp_GetSequentialPaymentsPrivateLesson)
+                                        </tbody>
+                                    </table>
+                                </div>                                
+                            </div>
+                            <!--end::Group-->
+
+                        </div>
+
+                    </div>
+                }
+
+
+
+            </div>
+        </form>
+        <!--end::Form-->
+    </div>
+</div>
+
+<!--begin: Modal-->
+<div class="modal fade" id="NewDriverPaymentPlan" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="staticBackdrop" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Taksit Bilgisi</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <i aria-hidden="true" class="ki ki-close"></i>
+                </button>
+            </div>
+            <div class="modal-body" id="dataDriverPaymentPlan"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light-primary font-weight-bold" data-dismiss="modal">Kapat</button>
+                <button type="button" class="btn btn-success font-weight-bold" onclick="js_addDriverPaymentPlan()">Kaydet</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!--end::Modal-->
+<!--begin: Modal-->
+<div class="modal fade" id="NewHirePurchase" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="staticBackdrop" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Taksitlendirme İşlemi</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <i aria-hidden="true" class="ki ki-close"></i>
+                </button>
+            </div>
+            <div class="modal-body" id="dataHirePurchase"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light-primary font-weight-bold" data-dismiss="modal">Kapat</button>
+                <button type="button" class="btn btn-success font-weight-bold" onclick="js_doHirePurchase()">Taksitlendir(Kaydet)</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!--end::Modal-->
+<!--begin: Modal-->
+<div class="modal fade" id="NewDriverCollectionDetail" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="staticBackdrop" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Tahsilat İşlemi</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <i aria-hidden="true" class="ki ki-close"></i>
+                </button>
+            </div>
+            <div class="modal-body" id="dataDriverCollectionDetail"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light-primary font-weight-bold" data-dismiss="modal">Kapat</button>
+                <button type="button" class="btn btn-success font-weight-bold" onclick="js_addEditDriverCollectionDetail()">Kaydet</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!--end::Modal-->
+<!--begin: Modal-->
+<div class="modal fade" id="CollectionDetailList" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="staticBackdrop" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Tahsilat Seçimi</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <i aria-hidden="true" class="ki ki-close"></i>
+                </button>
+            </div>
+            <div class="modal-body" id="dataDriverCollectionDetailList"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light-primary font-weight-bold" data-dismiss="modal">Kapat</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!--end::Modal-->
+<!--begin: Modal-->
+<div class="modal fade" id="CollectionDetailListOfDriver" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="staticBackdrop" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Sürücü Adayı Tahsilat Detayları</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <i aria-hidden="true" class="ki ki-close"></i>
+                </button>
+            </div>
+            <div class="modal-body" id="dataCollectionDetailListOfDriver"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light-primary font-weight-bold" data-dismiss="modal">Kapat</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!--end::Modal-->
+
+
+<script src="~/js/Driver/js_Driver.js" asp-append-version="true"></script>
+<script src="~/js/Collection/js_Collection.js" asp-append-version="true"></script>

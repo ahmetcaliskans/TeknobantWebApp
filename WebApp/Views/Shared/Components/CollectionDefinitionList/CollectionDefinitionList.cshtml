@@ -1,0 +1,30 @@
+﻿
+@model dynamic
+
+<div class="form-group row">
+    <label class="col-form-label col-lg-3 col-xl-3">Tahsilat Tipi</label>
+    <div class="col-lg-9 col-xl-9">
+        <select class="form-control is-valid" name="selectCollectionDefinition" id="selectCollectionDefinition" onchange="js_checkCollectionDefinitionInformations()">
+
+            @if ((int)Model.SelectedId == -99)
+            {
+                <option selected="" value="0">Hepsi</option>
+            }
+
+            @foreach (var collectionDefinition in Model.CollectionDefinition as List<Entities.Concrete.CollectionDefinition>)
+            {
+
+                if (collectionDefinition.Id == (int)Model.SelectedId)
+                {
+                    <option selected="" value="@collectionDefinition.Id">@collectionDefinition.Name @if (collectionDefinition.Sequence != null && collectionDefinition.Sequence!=0) @string.Format(" - {0}", collectionDefinition.Sequence)</option>
+                }
+                else
+                {
+                    <option value="@collectionDefinition.Id">@collectionDefinition.Name @if (collectionDefinition.Sequence != null && collectionDefinition.Sequence != 0)@string.Format(" - {0}", collectionDefinition.Sequence)</option>
+
+                }
+
+            }
+        </select>
+    </div>
+</div>
